@@ -12,14 +12,16 @@ type tetromino struct {
 	letter byte
 }
 
+// blocksAreConnected reports whether every block is reachable
+// from the first block through shared edges.
 func blocksAreConnected(blocks [4]point) bool {
 	var visited [4]bool
 	var queue [4]int
 	visited[0] = true
 	queue[0] = 0
-	visitedCount := 1
+	queueLength := 1
 
-	for head := 0; head < visitedCount; head++ {
+	for head := 0; head < queueLength; head++ {
 		current := blocks[queue[head]]
 
 		for index, candidate := range blocks {
@@ -36,14 +38,16 @@ func blocksAreConnected(blocks [4]point) bool {
 			}
 
 			visited[index] = true
-			queue[visitedCount] = index
-			visitedCount++
+			queue[queueLength] = index
+			queueLength++
 		}
 	}
 
-	return visitedCount == len(blocks)
+	return queueLength == len(blocks)
 }
 
+// normalize translates the blocks so their bounding box starts at (0, 0)
+// and returns the normalized blocks and bounding-box dimensions.
 func normalize(blocks [4]point) ([4]point, int, int) {
 	minX := blocks[0].x
 	minY := blocks[0].y
