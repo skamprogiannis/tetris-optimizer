@@ -2,24 +2,32 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "usage: %s <input.txt>\n", os.Args[0])
-		os.Exit(1)
+	execute(os.Args[1:], os.Stdout)
+}
+
+func execute(args []string, output io.Writer) {
+	if len(args) != 1 {
+		fmt.Fprintln(output, "ERROR")
+		return
 	}
 
-	path := os.Args[1]
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(args[0])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: read %q: %v\n", path, err)
-		os.Exit(1)
+		fmt.Fprintln(output, "ERROR")
+		return
 	}
 
-	if _, err := parseTetrominoes(data); err != nil {
-		fmt.Fprintf(os.Stderr, "error: parse %q: %v\n", path, err)
-		os.Exit(1)
+	pieces, err := parseTetrominoes(data)
+	if err != nil {
+		fmt.Fprintln(output, "ERROR")
+		return
 	}
+
+	board, size := solveTetrominoes(pieces)
+	fmt.Fprint(output, formatBoard(board, size))
 }
